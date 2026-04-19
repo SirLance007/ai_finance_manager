@@ -3,6 +3,8 @@ import 'package:ai_finance_manager/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ai_finance_manager/screens/onboarding_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -50,12 +52,29 @@ class LoginScreen extends StatelessWidget {
                       final AuthCredential credential = GoogleAuthProvider.credential(
                         idToken: googleAuth.idToken,
                       );
-                      await FirebaseAuth.instance.signInWithCredential(credential);
+                      final userCred = await FirebaseAuth.instance.signInWithCredential(credential);
                       
-                      if (context.mounted) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => const HomeScreen()),
-                        );
+                      if (userCred.user != null) {
+                        try {
+                          final userDoc = await FirebaseFirestore.instance.collection('users').doc(userCred.user!.uid).get();
+                          if (context.mounted) {
+                            if (userDoc.exists && userDoc.data() != null && userDoc.data()!.containsKey('salary')) {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(builder: (context) => const HomeScreen()),
+                              );
+                            } else {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+                              );
+                            }
+                          }
+                        } catch (firestoreError) {
+                          if (context.mounted) {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+                            );
+                          }
+                        }
                       }
                     }
                   } catch (e) {

@@ -1,62 +1,127 @@
 import 'package:ai_finance_manager/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:ai_finance_manager/screens/add_expense_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool _obscured = false;
+
+  void _toggleObscure() {
+    setState(() => _obscured = !_obscured);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              _CustomAppBar(),
-              SizedBox(height: 24),
-              _BalanceCard(),
-              SizedBox(height: 16),
-              _IncomeSpendingRow(),
-              SizedBox(height: 32),
-              _SectionHeader(title: 'Quick Actions', actionText: 'See All'),
-              SizedBox(height: 16),
-              _QuickActionsRow(),
-              SizedBox(height: 24),
-              _TipCard(),
-              SizedBox(height: 32),
-              _SectionHeader(title: 'Recent Transactions', actionText: 'See All'),
-              SizedBox(height: 16),
-              _TransactionsList(),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: _BottomNav(),
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.hasError) {
+          return const Scaffold(
+            backgroundColor: AppColors.background,
+            body: Center(child: CircularProgressIndicator(color: AppColors.darkGreen)),
+          );
+        }
+
+        final data = snapshot.data!.data() as Map<String, dynamic>? ?? {};
+        final name = data['name'] as String? ?? 'User';
+        final photoUrl = data['photoUrl'] as String? ?? 'https://i.pravatar.cc/150';
+        
+        final salary = (data['salary'] ?? 0.0) as double;
+        final emi = (data['emi'] ?? 0.0) as double;
+        final budget = (data['budget'] ?? 0.0) as double;
+        
+        return StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance.collection('users').doc(user.uid).collection('transactions').orderBy('date', descending: true).snapshots(),
+          builder: (context, txSnapshot) {
+            double totalSpent = 0.0;
+            if (txSnapshot.hasData) {
+              for (var doc in txSnapshot.data!.docs) {
+                final docData = doc.data() as Map<String, dynamic>;
+                if (docData['type'] == 'expense') {
+                  totalSpent += (docData['amount'] ?? 0.0) as double;
+                }
+              }
+            }
+
+            final estimatedSavings = salary - emi - totalSpent;
+            final txDocs = txSnapshot.hasData ? txSnapshot.data!.docs : [];
+
+            return Scaffold(
+              backgroundColor: AppColors.background,
+              body: SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _CustomAppBar(name: name, photoUrl: photoUrl),
+                      const SizedBox(height: 24),
+                      _BalanceCard(
+                        balance: estimatedSavings,
+                        obscured: _obscured,
+                        onToggleObscure: _toggleObscure,
+                      ),
+                      const SizedBox(height: 16),
+                      _IncomeSpendingRow(
+                        income: salary,
+                        spending: totalSpent,
+                        obscured: _obscured,
+                      ),
+                      const SizedBox(height: 32),
+                      const _SectionHeader(title: 'Quick Actions', actionText: ''),
+                      const SizedBox(height: 16),
+                      const _QuickActionsRow(),
+                      const SizedBox(height: 24),
+                      const _TipCard(),
+                      const SizedBox(height: 32),
+                      const _SectionHeader(title: 'Recent Transactions', actionText: 'See All'),
+                      const SizedBox(height: 16),
+                      _TransactionsList(transactions: txDocs),
+                    ],
+                  ),
+                ),
+              ),
+              bottomNavigationBar: const _BottomNav(),
+            );
+          }
+        );
+      }
     );
   }
 }
 
 class _CustomAppBar extends StatelessWidget {
-  const _CustomAppBar();
+  final String name;
+  final String photoUrl;
+
+  const _CustomAppBar({required this.name, required this.photoUrl});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const CircleAvatar(
+        CircleAvatar(
           radius: 24,
-          backgroundImage: NetworkImage(
-            'https://i.pravatar.cc/150?u=michael', // Mock avatar
-          ),
+          backgroundImage: NetworkImage(photoUrl),
+          backgroundColor: Colors.grey.shade300,
         ),
         const SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text(
+          children: [
+            const Text(
               'Good Morning,',
               style: TextStyle(
                 color: AppColors.textLight,
@@ -64,8 +129,8 @@ class _CustomAppBar extends StatelessWidget {
               ),
             ),
             Text(
-              'Prankur Sharma',
-              style: TextStyle(
+              name,
+              style: const TextStyle(
                 color: AppColors.textDark,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -88,7 +153,15 @@ class _CustomAppBar extends StatelessWidget {
 }
 
 class _BalanceCard extends StatelessWidget {
-  const _BalanceCard();
+  final double balance;
+  final bool obscured;
+  final VoidCallback onToggleObscure;
+
+  const _BalanceCard({
+    required this.balance,
+    required this.obscured,
+    required this.onToggleObscure,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -105,16 +178,23 @@ class _BalanceCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Total Balance',
+                'Estimated Savings / Month',
                 style: TextStyle(color: Colors.white70, fontSize: 14),
               ),
-              Icon(LucideIcons.eye, color: Colors.white.withOpacity(0.7), size: 20),
+              GestureDetector(
+                onTap: onToggleObscure,
+                child: Icon(
+                  obscured ? LucideIcons.eyeOff : LucideIcons.eye, 
+                  color: Colors.white.withOpacity(0.7), 
+                  size: 20
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            '\$98,123.40',
-            style: TextStyle(
+          Text(
+            obscured ? '******' : '\$${balance.toStringAsFixed(2)}',
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 32,
               fontWeight: FontWeight.bold,
@@ -186,7 +266,15 @@ class _SparklinePainter extends CustomPainter {
 }
 
 class _IncomeSpendingRow extends StatelessWidget {
-  const _IncomeSpendingRow();
+  final double income;
+  final double spending;
+  final bool obscured;
+
+  const _IncomeSpendingRow({
+    required this.income, 
+    required this.spending,
+    required this.obscured,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -195,7 +283,7 @@ class _IncomeSpendingRow extends StatelessWidget {
         Expanded(
           child: _StatCard(
             title: 'Monthly Income',
-            amount: '\$3,422.00',
+            amount: obscured ? '****' : '\$${income.toStringAsFixed(2)}',
             icon: LucideIcons.arrowDownCircle,
             iconColor: Colors.green,
           ),
@@ -203,8 +291,8 @@ class _IncomeSpendingRow extends StatelessWidget {
         const SizedBox(width: 16),
         Expanded(
           child: _StatCard(
-            title: 'Monthly Spending',
-            amount: '\$1,433.20',
+            title: 'Spent this Month',
+            amount: obscured ? '****' : '\$${spending.toStringAsFixed(2)}',
             icon: LucideIcons.arrowUpRightSquare,
             iconColor: Colors.grey.shade700,
           ),
@@ -284,11 +372,14 @@ class _QuickActionsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: const [
-        _ActionItem(title: 'Add\nExpense', icon: LucideIcons.plus, isActive: false),
-        _ActionItem(title: 'Portfolio', icon: LucideIcons.pieChart, isActive: false),
-        _ActionItem(title: 'Goals', icon: LucideIcons.target, isActive: false),
-        _ActionItem(title: 'Cards\nGuide', icon: LucideIcons.bookOpen, isActive: true),
+      children: [
+        GestureDetector(
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddExpenseScreen())),
+          child: const _ActionItem(title: 'Add\nExpense', icon: LucideIcons.plus, isActive: true),
+        ),
+        const _ActionItem(title: 'Portfolio', icon: LucideIcons.pieChart, isActive: false),
+        const _ActionItem(title: 'Goals', icon: LucideIcons.target, isActive: false),
+        const _ActionItem(title: 'Cards\nGuide', icon: LucideIcons.bookOpen, isActive: false),
       ],
     );
   }
@@ -357,40 +448,32 @@ class _TipCard extends StatelessWidget {
 }
 
 class _TransactionsList extends StatelessWidget {
-  const _TransactionsList();
+  final List<dynamic> transactions;
+  const _TransactionsList({required this.transactions});
 
   @override
   Widget build(BuildContext context) {
+    if (transactions.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.all(20),
+        child: Center(child: Text("No transactions yet. Add some!", style: TextStyle(color: AppColors.textLight))),
+      );
+    }
+
     return Column(
-      children: [
-        _TransactionTile(
-          icon: LucideIcons.utensils,
-          iconBg: Colors.orange.withOpacity(0.1),
-          iconColor: Colors.orange,
-          title: 'Swiggy Food',
-          subtitle: 'Today, 12:30 PM',
-          amount: '-\$24.50',
-          isNegative: true,
-        ),
-        _TransactionTile(
-          icon: LucideIcons.calendarDays,
-          iconBg: Colors.green.withOpacity(0.1),
-          iconColor: Colors.green,
-          title: 'Salary Credit',
-          subtitle: 'Yesterday, 09:00 AM',
-          amount: '+\$3,422.00',
-          isNegative: false,
-        ),
-        _TransactionTile(
-          icon: LucideIcons.music,
-          iconBg: Colors.blue.withOpacity(0.1),
-          iconColor: Colors.blue,
-          title: 'Spotify Subscription',
-          subtitle: '20 Jan 2024',
-          amount: '-\$11.99',
-          isNegative: true,
-        ),
-      ],
+      children: transactions.take(5).map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        final isNegative = data['type'] == 'expense';
+        return _TransactionTile(
+          icon: isNegative ? LucideIcons.shoppingBag : LucideIcons.arrowDownCircle,
+          iconBg: isNegative ? Colors.orange.withOpacity(0.1) : Colors.green.withOpacity(0.1),
+          iconColor: isNegative ? Colors.orange : Colors.green,
+          title: data['title'] ?? 'Transaction',
+          subtitle: data['category'] ?? 'General',
+          amount: '${isNegative ? '-' : '+'}\$${(data['amount'] ?? 0).toStringAsFixed(2)}',
+          isNegative: isNegative,
+        );
+      }).toList(),
     );
   }
 }
