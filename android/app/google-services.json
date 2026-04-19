@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "523051852927",
+    "project_id": "ai-finance-manager-1de9f",
+    "storage_bucket": "ai-finance-manager-1de9f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:523051852927:android:671b2532ed178fbcf94b4a",
+        "android_client_info": {
+          "package_name": "com.hackathon.ai_finance_manager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "523051852927-f78iivcn5do19kirb1bbqcpe9oj3t05d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hackathon.ai_finance_manager",
+            "certificate_hash": "04d8b0d9905d10f49ed7f88729e6d82c94226ed1"
+          }
+        },
+        {
+          "client_id": "523051852927-4p72p0a2ca3lfu07s7c5046gcegpd5sq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAWicDshYuS1UlweuzC6d7jZe1xY1RgX0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "523051852927-4p72p0a2ca3lfu07s7c5046gcegpd5sq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
