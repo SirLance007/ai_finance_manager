@@ -79,7 +79,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Text('\$ ', style: TextStyle(color: Colors.black, fontSize: 32, fontWeight: FontWeight.bold)),
+                const Text('₹ ', style: TextStyle(color: Colors.black, fontSize: 32, fontWeight: FontWeight.bold)),
                 Expanded(
                   child: TextField(
                     controller: _amountController,

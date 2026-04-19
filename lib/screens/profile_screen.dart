@@ -45,7 +45,7 @@ class ProfileScreen extends StatelessWidget {
                 autofocus: true,
                 style: const TextStyle(color: Colors.black),
                 decoration: InputDecoration(
-                  prefixText: '\$ ',
+                  prefixText: '₹ ',
                   prefixStyle: const TextStyle(color: Colors.black, fontSize: 16),
                   filled: true,
                   fillColor: Colors.grey.shade100,
@@ -143,7 +143,7 @@ class ProfileScreen extends StatelessWidget {
                           children: [
                             const Text('MONTHLY SALARY', style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.0)),
                             const SizedBox(height: 8),
-                            Text('\$${salary.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold)),
+                            Text('₹${salary.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold)),
                           ],
                         ),
                         GestureDetector(

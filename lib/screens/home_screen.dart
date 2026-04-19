@@ -6,6 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:ai_finance_manager/screens/add_expense_screen.dart';
 import 'package:ai_finance_manager/screens/goals_screen.dart';
 import 'package:ai_finance_manager/screens/profile_screen.dart';
+import 'package:ai_finance_manager/screens/ai_insights_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -65,9 +66,11 @@ class _HomeScreenState extends State<HomeScreen> {
               backgroundColor: AppColors.background,
               body: _currentIndex == 2 
                   ? GoalsScreen(photoUrl: photoUrl) 
-                  : _currentIndex == 4 
-                      ? const ProfileScreen() 
-                      : (_currentIndex == 0 ? SafeArea(
+                  : _currentIndex == 3
+                      ? const AiInsightsScreen()
+                      : _currentIndex == 4 
+                          ? const ProfileScreen() 
+                          : (_currentIndex == 0 ? SafeArea(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
                   child: Column(
@@ -203,7 +206,7 @@ class _BalanceCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            obscured ? '******' : '\$${balance.toStringAsFixed(2)}',
+            obscured ? '******' : '₹${balance.toStringAsFixed(2)}',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 32,
@@ -293,7 +296,7 @@ class _IncomeSpendingRow extends StatelessWidget {
         Expanded(
           child: _StatCard(
             title: 'Monthly Income',
-            amount: obscured ? '****' : '\$${income.toStringAsFixed(2)}',
+            amount: obscured ? '****' : '₹${income.toStringAsFixed(2)}',
             icon: LucideIcons.arrowDownCircle,
             iconColor: Colors.green,
           ),
@@ -302,7 +305,7 @@ class _IncomeSpendingRow extends StatelessWidget {
         Expanded(
           child: _StatCard(
             title: 'Spent this Month',
-            amount: obscured ? '****' : '\$${spending.toStringAsFixed(2)}',
+            amount: obscured ? '****' : '₹${spending.toStringAsFixed(2)}',
             icon: LucideIcons.arrowUpRightSquare,
             iconColor: Colors.grey.shade700,
           ),
@@ -509,7 +512,7 @@ class _TransactionsList extends StatelessWidget {
           iconColor: color,
           title: data['title'] ?? 'Transaction',
           subtitle: category,
-          amount: '${isNegative ? '-' : '+'}\$${(data['amount'] ?? 0).toStringAsFixed(2)}',
+          amount: '${isNegative ? '-' : '+'}₹${(data['amount'] ?? 0).toStringAsFixed(2)}',
           isNegative: isNegative,
         );
       }).toList(),
@@ -602,7 +605,7 @@ class _BottomNav extends StatelessWidget {
           BottomNavigationBarItem(icon: Icon(LucideIcons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(LucideIcons.pieChart), label: 'Portfolio'),
           BottomNavigationBarItem(icon: Icon(LucideIcons.target), label: 'Goals'),
-          BottomNavigationBarItem(icon: Icon(LucideIcons.newspaper), label: 'News'),
+          BottomNavigationBarItem(icon: Icon(LucideIcons.sparkles), label: 'Smart Savings'),
           BottomNavigationBarItem(icon: Icon(LucideIcons.user), label: 'Profile'),
         ],
       ),

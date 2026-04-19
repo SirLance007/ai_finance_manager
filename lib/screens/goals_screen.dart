@@ -123,11 +123,11 @@ class GoalsScreen extends StatelessWidget {
                                       children: [
                                         Text(title, style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold)),
                                         const SizedBox(height: 4),
-                                        Text('Target: \$${target.toStringAsFixed(0)}', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                                        Text('Target: ₹${target.toStringAsFixed(0)}', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
                                       ],
                                     ),
                                   ),
-                                  Text('\$${saved.toStringAsFixed(2)}', style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold)),
+                                  Text('₹${saved.toStringAsFixed(2)}', style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold)),
                                 ],
                               ),
                               const SizedBox(height: 20),
