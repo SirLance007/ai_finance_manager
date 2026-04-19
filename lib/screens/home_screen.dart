@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:ai_finance_manager/screens/add_expense_screen.dart';
+import 'package:ai_finance_manager/screens/goals_screen.dart';
+import 'package:ai_finance_manager/screens/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,6 +16,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _obscured = false;
+  int _currentIndex = 0;
 
   void _toggleObscure() {
     setState(() => _obscured = !_obscured);
@@ -60,7 +63,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
             return Scaffold(
               backgroundColor: AppColors.background,
-              body: SafeArea(
+              body: _currentIndex == 2 
+                  ? GoalsScreen(photoUrl: photoUrl) 
+                  : _currentIndex == 4 
+                      ? const ProfileScreen() 
+                      : (_currentIndex == 0 ? SafeArea(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
                   child: Column(
@@ -92,8 +99,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
+              ) : const Center(child: Text("Coming Soon", style: TextStyle(color: AppColors.textDark)))),
+              bottomNavigationBar: _BottomNav(
+                currentIndex: _currentIndex,
+                onTap: (index) => setState(() => _currentIndex = index),
               ),
-              bottomNavigationBar: const _BottomNav(),
             );
           }
         );
@@ -451,6 +461,30 @@ class _TransactionsList extends StatelessWidget {
   final List<dynamic> transactions;
   const _TransactionsList({required this.transactions});
 
+  IconData _getIconForCategory(String category, bool isNegative) {
+    if (!isNegative) return LucideIcons.arrowDownCircle;
+    switch (category) {
+      case 'Food': return LucideIcons.utensils;
+      case 'Transportation': return LucideIcons.car;
+      case 'Entertainment': return LucideIcons.tv;
+      case 'Shopping': return LucideIcons.shoppingBag;
+      case 'Utilities': return LucideIcons.zap;
+      default: return LucideIcons.receipt;
+    }
+  }
+
+  Color _getColorForCategory(String category, bool isNegative) {
+    if (!isNegative) return Colors.green;
+    switch (category) {
+      case 'Food': return Colors.orange;
+      case 'Transportation': return Colors.blue;
+      case 'Entertainment': return Colors.purple;
+      case 'Shopping': return Colors.pink;
+      case 'Utilities': return Colors.amber;
+      default: return Colors.grey.shade700;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (transactions.isEmpty) {
@@ -461,15 +495,20 @@ class _TransactionsList extends StatelessWidget {
     }
 
     return Column(
-      children: transactions.take(5).map((doc) {
+      children: transactions.take(10).map((doc) {
         final data = doc.data() as Map<String, dynamic>;
         final isNegative = data['type'] == 'expense';
+        final category = data['category'] ?? 'Other';
+        
+        final icon = _getIconForCategory(category, isNegative);
+        final color = _getColorForCategory(category, isNegative);
+
         return _TransactionTile(
-          icon: isNegative ? LucideIcons.shoppingBag : LucideIcons.arrowDownCircle,
-          iconBg: isNegative ? Colors.orange.withOpacity(0.1) : Colors.green.withOpacity(0.1),
-          iconColor: isNegative ? Colors.orange : Colors.green,
+          icon: icon,
+          iconBg: color.withOpacity(0.1),
+          iconColor: color,
           title: data['title'] ?? 'Transaction',
-          subtitle: data['category'] ?? 'General',
+          subtitle: category,
           amount: '${isNegative ? '-' : '+'}\$${(data['amount'] ?? 0).toStringAsFixed(2)}',
           isNegative: isNegative,
         );
@@ -537,7 +576,10 @@ class _TransactionTile extends StatelessWidget {
 }
 
 class _BottomNav extends StatelessWidget {
-  const _BottomNav();
+  final int currentIndex;
+  final Function(int) onTap;
+
+  const _BottomNav({required this.currentIndex, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -550,26 +592,18 @@ class _BottomNav extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         type: BottomNavigationBarType.fixed,
+        currentIndex: currentIndex,
+        onTap: onTap,
         selectedItemColor: AppColors.darkGreen,
         unselectedItemColor: AppColors.textLight,
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11),
         unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 11),
-        items: [
-          BottomNavigationBarItem(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.pillGreen,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(LucideIcons.home, color: AppColors.darkGreen),
-            ),
-            label: 'Home',
-          ),
-          const BottomNavigationBarItem(icon: Icon(LucideIcons.pieChart), label: 'Portfolio'),
-          const BottomNavigationBarItem(icon: Icon(LucideIcons.target), label: 'Goals'),
-          const BottomNavigationBarItem(icon: Icon(LucideIcons.newspaper), label: 'News'),
-          const BottomNavigationBarItem(icon: Icon(LucideIcons.user), label: 'Profile'),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(LucideIcons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(LucideIcons.pieChart), label: 'Portfolio'),
+          BottomNavigationBarItem(icon: Icon(LucideIcons.target), label: 'Goals'),
+          BottomNavigationBarItem(icon: Icon(LucideIcons.newspaper), label: 'News'),
+          BottomNavigationBarItem(icon: Icon(LucideIcons.user), label: 'Profile'),
         ],
       ),
     );
