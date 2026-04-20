@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ai_finance_manager/screens/login_screen.dart';
+import 'package:ai_finance_manager/screens/onboarding_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -21,65 +22,6 @@ class ProfileScreen extends StatelessWidget {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error logging out: $e')));
     }
-  }
-
-  Future<void> _showEditSalaryDialog(BuildContext context, double currentSalary) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-    
-    final controller = TextEditingController(text: currentSalary.toStringAsFixed(0));
-    bool isLoading = false;
-
-    await showDialog(
-      context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: const Text('Edit Monthly Salary', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-              content: TextField(
-                controller: controller,
-                keyboardType: TextInputType.number,
-                autofocus: true,
-                style: const TextStyle(color: Colors.black),
-                decoration: InputDecoration(
-                  prefixText: '₹ ',
-                  prefixStyle: const TextStyle(color: Colors.black, fontSize: 16),
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
-                ),
-                ElevatedButton(
-                  onPressed: isLoading ? null : () async {
-                    setState(() => isLoading = true);
-                    final newSalary = double.tryParse(controller.text) ?? currentSalary;
-                    await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-                      'salary': newSalary,
-                    });
-                    if (ctx.mounted) Navigator.of(ctx).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF133b2b),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: isLoading 
-                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text('Save', style: TextStyle(color: Colors.white)),
-                )
-              ],
-            );
-          }
-        );
-      }
-    );
   }
 
   @override
@@ -147,7 +89,12 @@ class ProfileScreen extends StatelessWidget {
                           ],
                         ),
                         GestureDetector(
-                          onTap: () => _showEditSalaryDialog(context, salary),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+                            );
+                          },
                           child: const Text('Edit', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold))
                         ),
                       ],

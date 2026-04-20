@@ -19,6 +19,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final List<Map<String, dynamic>> _categories = [
     {'name': 'Food', 'icon': LucideIcons.utensils},
     {'name': 'Transport', 'icon': LucideIcons.car},
+    {'name': 'Fuel', 'icon': LucideIcons.fuel},
     {'name': 'Shopping', 'icon': LucideIcons.shoppingBag},
     {'name': 'Bills', 'icon': LucideIcons.receipt},
     {'name': 'Other', 'icon': LucideIcons.moreHorizontal},

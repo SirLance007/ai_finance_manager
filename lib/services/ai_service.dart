@@ -13,6 +13,8 @@ class AIService {
       // Fetch user profile
       final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
       final salary = userDoc.data()?['salary'] ?? 0.0;
+      final cachedInsights = userDoc.data()?['aiInsightsCache'] as String?;
+      final cachedTotalSpend = (userDoc.data()?['totalSpendCache'] ?? -1.0) as double;
 
       // Fetch expenses
       final txSnapshot = await FirebaseFirestore.instance
@@ -34,6 +36,10 @@ class AIService {
 
       if (categorySpends.isEmpty) {
         return "I need a bit more data to act as your AI Finance Manager. Try adding some expenses in the Home tab first!";
+      }
+
+      if (cachedInsights != null && cachedInsights.isNotEmpty && cachedTotalSpend == totalSpend && cachedInsights.length > 50) {
+        return cachedInsights;
       }
 
       // Build Prompt
@@ -65,7 +71,16 @@ class AIService {
       final content = [Content.text(prompt)];
       final response = await model.generateContent(content);
 
-      return response.text ?? "Sorry, I couldn't generate insights at the moment. Please try again later.";
+      final generatedText = response.text ?? "Sorry, I couldn't generate insights at the moment. Please try again later.";
+      
+      if (!generatedText.contains("Sorry")) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'aiInsightsCache': generatedText,
+          'totalSpendCache': totalSpend,
+        }, SetOptions(merge: true));
+      }
+      
+      return generatedText;
 
     } catch (e) {
       if (e.toString().contains('503') || e.toString().contains('Unavailable') || e.toString().contains('high demand')) {

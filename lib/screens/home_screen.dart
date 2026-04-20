@@ -1,12 +1,15 @@
-import 'package:ai_finance_manager/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:ai_finance_manager/theme/app_colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:ai_finance_manager/screens/add_expense_screen.dart';
 import 'package:ai_finance_manager/screens/goals_screen.dart';
 import 'package:ai_finance_manager/screens/profile_screen.dart';
 import 'package:ai_finance_manager/screens/ai_insights_screen.dart';
+import 'package:ai_finance_manager/screens/portfolio_screen.dart';
+import 'package:ai_finance_manager/screens/onboarding_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -42,9 +45,18 @@ class _HomeScreenState extends State<HomeScreen> {
         final name = data['name'] as String? ?? 'User';
         final photoUrl = data['photoUrl'] as String? ?? 'https://i.pravatar.cc/150';
         
-        final salary = (data['salary'] ?? 0.0) as double;
-        final emi = (data['emi'] ?? 0.0) as double;
-        final budget = (data['budget'] ?? 0.0) as double;
+        final salary = (data['salary'] ?? 0.0) is num ? ((data['salary'] ?? 0.0) as num).toDouble() : 0.0;
+        final familyMembers = (data['familyMembers'] ?? 1) is num ? ((data['familyMembers'] ?? 1) as num).toInt() : 1;
+        final emi = (data['emi'] ?? 0.0) is num ? ((data['emi'] ?? 0.0) as num).toDouble() : 0.0;
+        final emiDate = (data['emiDate'] ?? 1) is num ? ((data['emiDate'] ?? 1) as num).toInt() : 1;
+        final subscriptions = (data['subscriptions'] ?? 0.0) is num ? ((data['subscriptions'] ?? 0.0) as num).toDouble() : 0.0;
+        final subscriptionsDate = (data['subscriptionsDate'] ?? 1) is num ? ((data['subscriptionsDate'] ?? 1) as num).toInt() : 1;
+        final groceries = (data['groceries'] ?? 0.0) is num ? ((data['groceries'] ?? 0.0) as num).toDouble() : 0.0;
+        final tvInternet = (data['tvInternet'] ?? 0.0) is num ? ((data['tvInternet'] ?? 0.0) as num).toDouble() : 0.0;
+        final tvInternetDate = (data['tvInternetDate'] ?? 1) is num ? ((data['tvInternetDate'] ?? 1) as num).toInt() : 1;
+        final otherBills = (data['otherBills'] ?? 0.0) is num ? ((data['otherBills'] ?? 0.0) as num).toDouble() : 0.0;
+        final otherBillsDate = (data['otherBillsDate'] ?? 1) is num ? ((data['otherBillsDate'] ?? 1) as num).toInt() : 1;
+        final budget = (data['budget'] ?? 0.0) is num ? ((data['budget'] ?? 0.0) as num).toDouble() : 0.0;
         
         return StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance.collection('users').doc(user.uid).collection('transactions').orderBy('date', descending: true).snapshots(),
@@ -64,45 +76,56 @@ class _HomeScreenState extends State<HomeScreen> {
 
             return Scaffold(
               backgroundColor: AppColors.background,
-              body: _currentIndex == 2 
-                  ? GoalsScreen(photoUrl: photoUrl) 
-                  : _currentIndex == 3
-                      ? const AiInsightsScreen()
-                      : _currentIndex == 4 
-                          ? const ProfileScreen() 
-                          : (_currentIndex == 0 ? SafeArea(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _CustomAppBar(name: name, photoUrl: photoUrl),
-                      const SizedBox(height: 24),
-                      _BalanceCard(
-                        balance: estimatedSavings,
-                        obscured: _obscured,
-                        onToggleObscure: _toggleObscure,
+              body: _currentIndex == 1
+                  ? const PortfolioScreen()
+                  : _currentIndex == 2 
+                      ? GoalsScreen(photoUrl: photoUrl) 
+                      : _currentIndex == 3
+                          ? const AiInsightsScreen()
+                          : _currentIndex == 4 
+                              ? const ProfileScreen() 
+                              : (_currentIndex == 0 ? SafeArea(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _CustomAppBar(name: name, photoUrl: photoUrl),
+                          const SizedBox(height: 24),
+                          _BalanceCard(
+                            balance: estimatedSavings,
+                            obscured: _obscured,
+                            onToggleObscure: _toggleObscure,
+                          ),
+                          const SizedBox(height: 16),
+                          _IncomeSpendingRow(
+                            income: salary,
+                            spending: totalSpent,
+                            obscured: _obscured,
+                          ),
+                          const SizedBox(height: 32),
+                          const _SectionHeader(title: 'Quick Actions', actionText: ''),
+                          const SizedBox(height: 16),
+                          const _QuickActionsRow(),
+                          const SizedBox(height: 32),
+                          const _SectionHeader(title: 'Upcoming Bills', actionText: ''),
+                          const SizedBox(height: 16),
+                          _UpcomingBills(
+                            emi: emi, emiDate: emiDate,
+                            subscriptions: subscriptions, subscriptionsDate: subscriptionsDate,
+                            tvInternet: tvInternet, tvInternetDate: tvInternetDate,
+                            otherBills: otherBills, otherBillsDate: otherBillsDate,
+                          ),
+                          const SizedBox(height: 24),
+                          const _TipCard(),
+                          const SizedBox(height: 32),
+                          const _SectionHeader(title: 'Recent Transactions', actionText: 'See All'),
+                          const SizedBox(height: 16),
+                          _TransactionsList(transactions: txDocs),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      _IncomeSpendingRow(
-                        income: salary,
-                        spending: totalSpent,
-                        obscured: _obscured,
-                      ),
-                      const SizedBox(height: 32),
-                      const _SectionHeader(title: 'Quick Actions', actionText: ''),
-                      const SizedBox(height: 16),
-                      const _QuickActionsRow(),
-                      const SizedBox(height: 24),
-                      const _TipCard(),
-                      const SizedBox(height: 32),
-                      const _SectionHeader(title: 'Recent Transactions', actionText: 'See All'),
-                      const SizedBox(height: 16),
-                      _TransactionsList(transactions: txDocs),
-                    ],
-                  ),
-                ),
-              ) : const Center(child: Text("Coming Soon", style: TextStyle(color: AppColors.textDark)))),
+                    ),
+                  ) : const Center(child: Text("Coming Soon", style: TextStyle(color: AppColors.textDark)))),
               bottomNavigationBar: _BottomNav(
                 currentIndex: _currentIndex,
                 onTap: (index) => setState(() => _currentIndex = index),
@@ -229,7 +252,7 @@ class _BalanceCard extends StatelessWidget {
                     SizedBox(width: 4),
                     Text(
                       '2.60%',
-                      style: TextStyle(color: Colors.greenAccent, fontSize: 12, fontWeight: FontWeight.w600),
+                      style: TextStyle(color: Colors.greenAccent, fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -240,7 +263,6 @@ class _BalanceCard extends StatelessWidget {
                 style: TextStyle(color: Colors.white60, fontSize: 13),
               ),
               const Spacer(),
-              // MOCK SPARKLINE (Line using basic container for now to save space, normally uses fl_chart)
               SizedBox(
                 width: 80,
                 height: 30,
@@ -610,5 +632,88 @@ class _BottomNav extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _UpcomingBills extends StatelessWidget {
+  final double emi;
+  final int emiDate;
+  final double subscriptions;
+  final int subscriptionsDate;
+  final double tvInternet;
+  final int tvInternetDate;
+  final double otherBills;
+  final int otherBillsDate;
+
+  const _UpcomingBills({
+    required this.emi,
+    required this.emiDate,
+    required this.subscriptions,
+    required this.subscriptionsDate,
+    required this.tvInternet,
+    required this.tvInternetDate,
+    required this.otherBills,
+    required this.otherBillsDate,
+  });
+
+  String _formatDate(int day) {
+    if (day >= 11 && day <= 13) return '${day}th';
+    switch (day % 10) {
+      case 1: return '${day}st';
+      case 2: return '${day}nd';
+      case 3: return '${day}rd';
+      default: return '${day}th';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    List<Widget> billWidgets = [];
+
+    Widget buildBillItem(String title, double amount, int day, IconData icon, Color color) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
+              child: Icon(icon, color: color, size: 20),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textDark)),
+                  const SizedBox(height: 4),
+                  Text('Due on ${_formatDate(day)}', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                ],
+              ),
+            ),
+            Text('₹${amount.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textDark)),
+          ],
+        ),
+      );
+    }
+
+    if (emi > 0) billWidgets.add(buildBillItem('EMIs / Loans', emi, emiDate, LucideIcons.creditCard, Colors.redAccent));
+    if (subscriptions > 0) billWidgets.add(buildBillItem('Subscriptions', subscriptions, subscriptionsDate, LucideIcons.youtube, Colors.orangeAccent));
+    if (tvInternet > 0) billWidgets.add(buildBillItem('TV & Internet', tvInternet, tvInternetDate, LucideIcons.wifi, Colors.blueAccent));
+    if (otherBills > 0) billWidgets.add(buildBillItem('Other Utility Bills', otherBills, otherBillsDate, LucideIcons.fileText, Colors.purpleAccent));
+
+    if (billWidgets.isEmpty) {
+      return Center(
+        child: Text("No upcoming bills tracked.", style: TextStyle(color: Colors.grey.shade500)),
+      );
+    }
+
+    return Column(children: billWidgets);
   }
 }
