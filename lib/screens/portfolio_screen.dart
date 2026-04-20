@@ -8,6 +8,26 @@ import 'package:ai_finance_manager/theme/app_colors.dart';
 import 'package:ai_finance_manager/services/finance_api_service.dart';
 import 'package:ai_finance_manager/screens/add_asset_screen.dart';
 
+String formatINR(double amount) {
+  String numStr = amount.abs().toStringAsFixed(2);
+  List<String> parts = numStr.split('.');
+  String whole = parts[0];
+  String decimal = parts.length > 1 ? '.' + parts[1] : '';
+  
+  if (whole.length <= 3) return (amount < 0 ? '-' : '') + whole + decimal;
+  
+  String result = whole.substring(whole.length - 3);
+  whole = whole.substring(0, whole.length - 3);
+  
+  while (whole.isNotEmpty) {
+    int take = whole.length > 2 ? whole.length - 2 : 0;
+    result = '${whole.substring(take)},$result';
+    whole = whole.substring(0, take);
+  }
+  
+  return (amount < 0 ? '-' : '') + result + decimal;
+}
+
 class PortfolioScreen extends StatefulWidget {
   const PortfolioScreen({super.key});
 
@@ -280,14 +300,14 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          Text("₹${current.toStringAsFixed(2)}", style: const TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold, letterSpacing: -1)),
+          Text("₹${formatINR(current)}", style: const TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold, letterSpacing: -1)),
           const SizedBox(height: 8),
           Row(
             children: [
               Icon(isPositive ? LucideIcons.arrowUp : LucideIcons.arrowDown, color: isPositive ? Colors.greenAccent : Colors.redAccent, size: 16),
               const SizedBox(width: 4),
               Text("${pnlPercent.toStringAsFixed(2)}%", style: TextStyle(color: isPositive ? Colors.greenAccent : Colors.redAccent, fontSize: 13, fontWeight: FontWeight.w600)),
-              Text("  |  ${isPositive ? '+' : '-'}₹${pnl.abs().toStringAsFixed(2)} today", style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13)),
+              Text("  |  ${isPositive ? '+' : '-'}₹${formatINR(pnl.abs())} today", style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13)),
             ],
           ),
           const SizedBox(height: 24),
@@ -338,7 +358,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
                 children: [
                   Text("TOTAL INVESTED", style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
                   const SizedBox(height: 4),
-                  Text("₹${invested.toStringAsFixed(2)}", style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text("₹${formatINR(invested)}", style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
                 ],
               ),
               Container(width: 1, height: 30, color: Colors.white.withOpacity(0.1)),
@@ -347,7 +367,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
                 children: [
                   Text("TOTAL RETURNS", style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
                   const SizedBox(height: 4),
-                  Text("${isPositive ? '+' : '-'}₹${pnl.abs().toStringAsFixed(2)}", style: TextStyle(color: isPositive ? Colors.greenAccent : Colors.redAccent, fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text("${isPositive ? '+' : '-'}₹${formatINR(pnl.abs())}", style: TextStyle(color: isPositive ? Colors.greenAccent : Colors.redAccent, fontSize: 16, fontWeight: FontWeight.w600)),
                 ],
               )
             ],
@@ -441,8 +461,20 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
               child: Image.network(
                 'https://www.google.com/s2/favicons?domain=${item['domain']}&sz=128',
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => 
-                  const Icon(LucideIcons.candlestickChart, color: AppColors.primaryGreen, size: 24),
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.network(
+                    'https://www.google.com/s2/favicons?domain=${item['ticker'].split('.').first.toLowerCase()}.in&sz=128',
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.network(
+                        'https://www.google.com/s2/favicons?domain=${item['ticker'].split('.').first.toLowerCase()}.co.in&sz=128',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => 
+                          const Icon(LucideIcons.candlestickChart, color: AppColors.primaryGreen, size: 24),
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ),
@@ -453,7 +485,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
               children: [
                 Text(item['ticker'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textDark)),
                 const SizedBox(height: 4),
-                Text("${item['qty']} Qty • Avg ₹${item['buyPrice'].toStringAsFixed(2)}", style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.w500)),
+                Text("${item['qty']} Qty • Avg ₹${formatINR(item['buyPrice'])}", style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.w500)),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -473,7 +505,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("₹${item['currentValue'].toStringAsFixed(2)}", style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: AppColors.textDark)),
+              Text("₹${formatINR(item['currentValue'])}", style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: AppColors.textDark)),
               const SizedBox(height: 6),
               Row(
                 children: [
