@@ -46,10 +46,27 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
 
   int _apiCounter = 0;
 
+  bool _isIndianMarketOpen() {
+    final nowUtc = DateTime.now().toUtc();
+    final istTime = nowUtc.add(const Duration(hours: 5, minutes: 30));
+    
+    if (istTime.weekday == DateTime.saturday || istTime.weekday == DateTime.sunday) {
+      return false;
+    }
+    
+    final timeInMinutes = istTime.hour * 60 + istTime.minute;
+    final marketStart = 9 * 60 + 15; // 9:15 AM
+    final marketEnd = 15 * 60 + 30;  // 3:30 PM
+    
+    return timeInMinutes >= marketStart && timeInMinutes <= marketEnd;
+  }
+
   @override
   void initState() {
     super.initState();
     _pollingTimer = Timer.periodic(const Duration(seconds: 2), (_) {
+      if (!_isIndianMarketOpen()) return;
+
       if (liveDataCache.isNotEmpty && mounted) {
         setState(() {
           liveDataCache.forEach((key, data) {
