@@ -10,7 +10,7 @@ import 'package:ai_finance_manager/screens/profile_screen.dart';
 import 'package:ai_finance_manager/screens/ai_insights_screen.dart';
 import 'package:ai_finance_manager/screens/portfolio_screen.dart';
 import 'package:ai_finance_manager/screens/onboarding_screen.dart';
-
+import 'package:ai_finance_manager/screens/ai_invest_screen.dart';
 String formatINR(double amount) {
   String numStr = amount.abs().toStringAsFixed(2);
   List<String> parts = numStr.split('.');
@@ -434,7 +434,10 @@ class _QuickActionsRow extends StatelessWidget {
         ),
         const _ActionItem(title: 'Portfolio', icon: LucideIcons.pieChart, isActive: false),
         const _ActionItem(title: 'Goals', icon: LucideIcons.target, isActive: false),
-        const _ActionItem(title: 'Cards\nGuide', icon: LucideIcons.bookOpen, isActive: false),
+        GestureDetector(
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AiInvestScreen())),
+          child: const _ActionItem(title: 'AI\nInvest', icon: LucideIcons.trendingUp, isActive: true),
+        ),
       ],
     );
   }
