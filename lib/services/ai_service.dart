@@ -5,6 +5,95 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 class AIService {
   static const _apiKey = 'AIzaSyA8EpchtuWfSEuNm6zXLoEBVduLGjhF8Y8';
 
+  static Future<String> getSmartTips() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return '[]';
+
+    try {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      final data = userDoc.data() ?? {};
+      final salary = (data['salary'] ?? 0.0 as num).toDouble();
+      final emi = (data['emi'] ?? 0.0 as num).toDouble();
+
+      final txSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('transactions')
+          .where('type', isEqualTo: 'expense')
+          .get();
+
+      Map<String, double> categorySpends = {};
+      double totalSpend = 0;
+      for (var doc in txSnapshot.docs) {
+        final amount = (doc.data()['amount'] ?? 0.0 as num).toDouble();
+        final category = doc.data()['category'] as String? ?? 'Other';
+        categorySpends[category] = (categorySpends[category] ?? 0.0) + amount;
+        totalSpend += amount;
+      }
+
+      // Check cache
+      final cached = data['aiTipsCache'] as String?;
+      final cachedSpend = (data['aiTipsTotalSpendCache'] ?? -1.0 as num).toDouble();
+      if (cached != null && cached.isNotEmpty && cachedSpend == totalSpend && cached.length > 50) {
+        return cached;
+      }
+
+      String spendSummary = '';
+      categorySpends.forEach((cat, val) {
+        spendSummary += '- $cat: ₹${val.toStringAsFixed(0)}\n';
+      });
+
+      final prompt = '''
+You are an expert AI financial advisor for an Indian finance app. The user has:
+- Monthly salary: ₹${salary.toStringAsFixed(0)}
+- EMI/Loans: ₹${emi.toStringAsFixed(0)}/month
+- Total spending this month: ₹${totalSpend.toStringAsFixed(0)}
+- Spending by category:
+$spendSummary
+
+Generate exactly 3 smart, highly personalized financial tips for this user in Indian context.
+Return ONLY a raw JSON array. No markdown, no explanation. Use this exact schema:
+[
+  {
+    "badge": "Recommended",
+    "title": "Short catchy title",
+    "description": "2-3 sentence specific, actionable tip based on their actual data",
+    "type": "recommended",
+    "actionLabel": "View Breakdown",
+    "hasProgressBar": false,
+    "currentAmount": 0,
+    "previousAmount": 0,
+    "percentChange": 0
+  }
+]
+badge must be one of: "Recommended", "Needs Attention", "Great Opportunity"
+type must be one of: "recommended", "warning", "opportunity"
+For "Needs Attention" type tips, fill currentAmount (their actual spend in that category), previousAmount (estimated 15% lower), percentChange (percentage increase), and set hasProgressBar to true.
+Make tips specific to actual high spending categories. Reference real Indian apps, habits, and rupee amounts.
+''';
+
+      final model = GenerativeModel(model: 'gemini-2.5-flash', apiKey: _apiKey);
+      final response = await model.generateContent([Content.text(prompt)]);
+      final text = response.text ?? '[]';
+      final clean = text.replaceAll(RegExp(r'```json\n?'), '').replaceAll(RegExp(r'```\n?'), '').trim();
+
+      // Cache the result
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'aiTipsCache': clean,
+        'aiTipsTotalSpendCache': totalSpend,
+      }, SetOptions(merge: true));
+
+      return clean;
+    } catch (e) {
+      // Fallback
+      return '''[
+  {"badge": "Recommended", "title": "The 50/30/20 Rule", "description": "Allocate 50% to needs, 30% to wants, and 20% to savings. This golden rule can help you build wealth consistently over time.", "type": "recommended", "actionLabel": "View Breakdown", "hasProgressBar": false, "currentAmount": 0, "previousAmount": 0, "percentChange": 0},
+  {"badge": "Needs Attention", "title": "High Spending Detected", "description": "Your expenses are high relative to your income. Consider reviewing your largest categories and finding areas to cut back by 10-15%.", "type": "warning", "actionLabel": "", "hasProgressBar": true, "currentAmount": 8000, "previousAmount": 6500, "percentChange": 18},
+  {"badge": "Great Opportunity", "title": "Automate Your Savings", "description": "Set up a direct transfer to your savings account on payday. What you don't see, you won't spend. Even ₹2000/month grows significantly.", "type": "opportunity", "actionLabel": "Set Up Now", "hasProgressBar": false, "currentAmount": 0, "previousAmount": 0, "percentChange": 0}
+]''';
+    }
+  }
+
   static Future<String> getFinancialInsights() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return "Please log in to get AI insights.";

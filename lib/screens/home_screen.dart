@@ -11,6 +11,7 @@ import 'package:ai_finance_manager/screens/ai_insights_screen.dart';
 import 'package:ai_finance_manager/screens/portfolio_screen.dart';
 import 'package:ai_finance_manager/screens/onboarding_screen.dart';
 import 'package:ai_finance_manager/screens/ai_invest_screen.dart';
+import 'package:ai_finance_manager/screens/notifications_screen.dart';
 String formatINR(double amount) {
   String numStr = amount.abs().toStringAsFixed(2);
   List<String> parts = numStr.split('.');
@@ -195,9 +196,25 @@ class _CustomAppBar extends StatelessWidget {
           ],
         ),
         const Spacer(),
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(LucideIcons.bell, color: AppColors.textDark),
+        Stack(
+          children: [
+            IconButton(
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())),
+              icon: const Icon(LucideIcons.bell, color: AppColors.textDark),
+            ),
+            Positioned(
+              right: 8,
+              top: 8,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: Colors.redAccent,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ],
         ),
         IconButton(
           onPressed: () {},

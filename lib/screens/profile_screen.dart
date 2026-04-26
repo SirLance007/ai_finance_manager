@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ai_finance_manager/screens/login_screen.dart';
 import 'package:ai_finance_manager/screens/onboarding_screen.dart';
+import 'package:ai_finance_manager/screens/ai_tips_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -103,7 +104,13 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 32),
                   _buildListTile(icon: LucideIcons.user, title: 'Personal Information'),
                   const SizedBox(height: 8),
-                  _buildListTile(icon: LucideIcons.landmark, title: 'Bank Accounts'),
+                  _buildListTile(
+                    icon: LucideIcons.lightbulb,
+                    title: 'AI Smart Tips',
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const AiTipsScreen()));
+                    },
+                  ),
                   const SizedBox(height: 8),
                   _buildListTile(icon: LucideIcons.bell, title: 'Notifications'),
                   const SizedBox(height: 8),

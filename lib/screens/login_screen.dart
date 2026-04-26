@@ -53,12 +53,17 @@ class LoginScreen extends StatelessWidget {
                         idToken: googleAuth.idToken,
                       );
                       final userCred = await FirebaseAuth.instance.signInWithCredential(credential);
-                      
+
                       if (userCred.user != null) {
                         try {
-                          final userDoc = await FirebaseFirestore.instance.collection('users').doc(userCred.user!.uid).get();
+                          final userDoc = await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(userCred.user!.uid)
+                              .get();
                           if (context.mounted) {
-                            if (userDoc.exists && userDoc.data() != null && userDoc.data()!.containsKey('salary')) {
+                            if (userDoc.exists &&
+                                userDoc.data() != null &&
+                                userDoc.data()!.containsKey('salary')) {
                               Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(builder: (context) => const HomeScreen()),
                               );
@@ -68,7 +73,7 @@ class LoginScreen extends StatelessWidget {
                               );
                             }
                           }
-                        } catch (firestoreError) {
+                        } catch (_) {
                           if (context.mounted) {
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(builder: (context) => const OnboardingScreen()),
@@ -78,10 +83,12 @@ class LoginScreen extends StatelessWidget {
                       }
                     }
                   } catch (e) {
-                    debugPrint('Login failed with error: ' + e.toString());
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(e.toString())),
-                    );
+                    debugPrint('Login failed: $e');
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Login failed: ${e.toString()}')),
+                      );
+                    }
                   }
                 },
                 icon: const Icon(Icons.login, color: AppColors.darkGreen),
