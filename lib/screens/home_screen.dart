@@ -127,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(height: 32),
                           const _SectionHeader(title: 'Quick Actions', actionText: ''),
                           const SizedBox(height: 16),
-                          const _QuickActionsRow(),
+                          _QuickActionsRow(onActionTap: (index) => setState(() => _currentIndex = index)),
                           const SizedBox(height: 32),
                           const _SectionHeader(title: 'Upcoming Bills', actionText: ''),
                           const SizedBox(height: 16),
@@ -438,7 +438,8 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _QuickActionsRow extends StatelessWidget {
-  const _QuickActionsRow();
+  final Function(int) onActionTap;
+  const _QuickActionsRow({required this.onActionTap});
 
   @override
   Widget build(BuildContext context) {
@@ -449,8 +450,14 @@ class _QuickActionsRow extends StatelessWidget {
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddExpenseScreen())),
           child: const _ActionItem(title: 'Add\nExpense', icon: LucideIcons.plus, isActive: true),
         ),
-        const _ActionItem(title: 'Portfolio', icon: LucideIcons.pieChart, isActive: false),
-        const _ActionItem(title: 'Goals', icon: LucideIcons.target, isActive: false),
+        GestureDetector(
+          onTap: () => onActionTap(1),
+          child: const _ActionItem(title: 'Portfolio', icon: LucideIcons.pieChart, isActive: true),
+        ),
+        GestureDetector(
+          onTap: () => onActionTap(2),
+          child: const _ActionItem(title: 'Goals', icon: LucideIcons.target, isActive: true),
+        ),
         GestureDetector(
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AiInvestScreen())),
           child: const _ActionItem(title: 'AI\nInvest', icon: LucideIcons.trendingUp, isActive: true),
