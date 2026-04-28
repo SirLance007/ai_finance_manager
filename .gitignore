@@ -51,3 +51,4 @@ GoogleService-Info.plist
 # Sensitive environment variables
 .env
 .env.*
+lib/config/api_keys.dart
