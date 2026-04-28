@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:ai_finance_manager/config/api_keys.dart';
 
 class AIService {
-  static const _apiKey = 'AIzaSyA8EpchtuWfSEuNm6zXLoEBVduLGjhF8Y8';
+  static const _apiKey = ApiKeys.geminiApiKey;
 
   static Future<String> getSmartTips() async {
     final user = FirebaseAuth.instance.currentUser;

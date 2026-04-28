@@ -4,22 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'dart:math';
+import 'package:ai_finance_manager/utils/format_utils.dart';
 
-String formatINR(double amount) {
-  String numStr = amount.abs().toStringAsFixed(0);
-  if (numStr.length <= 3) return (amount < 0 ? '-' : '') + numStr;
 
-  String result = numStr.substring(numStr.length - 3);
-  String whole = numStr.substring(0, numStr.length - 3);
-
-  while (whole.isNotEmpty) {
-    int take = whole.length > 2 ? whole.length - 2 : whole.length;
-    result = '${whole.substring(whole.length - take)},$result';
-    whole = whole.substring(0, whole.length - take);
-  }
-
-  return (amount < 0 ? '-' : '') + result;
-}
 
 class AiInvestScreen extends StatefulWidget {
   const AiInvestScreen({super.key});

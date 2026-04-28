@@ -12,25 +12,8 @@ import 'package:ai_finance_manager/screens/portfolio_screen.dart';
 import 'package:ai_finance_manager/screens/onboarding_screen.dart';
 import 'package:ai_finance_manager/screens/ai_invest_screen.dart';
 import 'package:ai_finance_manager/screens/notifications_screen.dart';
-String formatINR(double amount) {
-  String numStr = amount.abs().toStringAsFixed(2);
-  List<String> parts = numStr.split('.');
-  String whole = parts[0];
-  String decimal = parts.length > 1 ? '.' + parts[1] : '';
-  
-  if (whole.length <= 3) return (amount < 0 ? '-' : '') + whole + decimal;
-  
-  String result = whole.substring(whole.length - 3);
-  whole = whole.substring(0, whole.length - 3);
-  
-  while (whole.isNotEmpty) {
-    int take = whole.length > 2 ? whole.length - 2 : 0;
-    result = '${whole.substring(take)},$result';
-    whole = whole.substring(0, take);
-  }
-  
-  return (amount < 0 ? '-' : '') + result + decimal;
-}
+import 'package:ai_finance_manager/utils/format_utils.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -355,7 +338,7 @@ class _IncomeSpendingRow extends StatelessWidget {
         Expanded(
           child: _StatCard(
             title: 'Monthly Income',
-            amount: obscured ? '****' : '₹${formatINR(income)}',
+            amount: obscured ? '****' : '₹${formatINR(income, isCompact: true)}',
             icon: LucideIcons.arrowDownCircle,
             iconColor: Colors.green,
           ),
@@ -364,7 +347,7 @@ class _IncomeSpendingRow extends StatelessWidget {
         Expanded(
           child: _StatCard(
             title: 'Spent this Month',
-            amount: obscured ? '****' : '₹${formatINR(spending)}',
+            amount: obscured ? '****' : '₹${formatINR(spending, isCompact: true)}',
             icon: LucideIcons.arrowUpRightSquare,
             iconColor: Colors.grey.shade700,
           ),
