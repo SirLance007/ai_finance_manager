@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 class AIService {
-  static const _apiKey = 'YOUR_GEMINI_API_KEY';
+  static const _apiKey = 'AIzaSyBcT0rbB7kfGXDC09IdAQ1vJ_28w7TOwpU';
 
   static Future<String> getSmartTips() async {
     final user = FirebaseAuth.instance.currentUser;

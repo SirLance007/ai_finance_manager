@@ -7,26 +7,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:ai_finance_manager/theme/app_colors.dart';
 import 'package:ai_finance_manager/services/finance_api_service.dart';
 import 'package:ai_finance_manager/screens/add_asset_screen.dart';
+import 'package:ai_finance_manager/utils/format_utils.dart';
 
-String formatINR(double amount) {
-  String numStr = amount.abs().toStringAsFixed(2);
-  List<String> parts = numStr.split('.');
-  String whole = parts[0];
-  String decimal = parts.length > 1 ? '.' + parts[1] : '';
-  
-  if (whole.length <= 3) return (amount < 0 ? '-' : '') + whole + decimal;
-  
-  String result = whole.substring(whole.length - 3);
-  whole = whole.substring(0, whole.length - 3);
-  
-  while (whole.isNotEmpty) {
-    int take = whole.length > 2 ? whole.length - 2 : 0;
-    result = '${whole.substring(take)},$result';
-    whole = whole.substring(0, take);
-  }
-  
-  return (amount < 0 ? '-' : '') + result + decimal;
-}
+
 
 class PortfolioScreen extends StatefulWidget {
   const PortfolioScreen({super.key});
