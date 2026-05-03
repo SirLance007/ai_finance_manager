@@ -7,9 +7,6 @@
 
 <div align="center">
   <img src="screenshots/home_screen.jpg" width="220" alt="Home Screen" />
-  <img src="screenshots/smart_savings.jpg" width="220" alt="Smart Savings" />
-  <img src="screenshots/ai_invest_plan.jpg" width="220" alt="AI Invest Plan" />
-  <img src="screenshots/portfolio.jpg" width="220" alt="Portfolio" />
 </div>
 
 ---
