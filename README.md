@@ -6,7 +6,7 @@
 ## 📸 App Screenshots
 
 <div align="center">
-  <img src="screenshots/home_screen.jpg" width="220" alt="Home Screen" />
+  <img src="screenshots/home_screen.jpg" width="100%" alt="Home Screen" />
 </div>
 
 ---
