@@ -3,26 +3,38 @@
 
 ---
 
-## 👥 Team & Problem Details
+## 📸 App Screenshots
 
-- **Team Name**: [ENTER_TEAM_NAME]
-- **Team Leader Name**: [ENTER_NAME]
-- **Problem Statement**: Most personal finance apps are passive "record-keepers" rather than active "advisors." Users often log their expenses but fail to understand *how* to optimize their spending, which credit cards offer the best value for their specific habits, or how to start investing based on their actual savings. There is a massive gap between data collection and financial wisdom.
+<div align="center">
+  <img src="screenshots/home_screen.jpg" width="220" alt="Home Screen" />
+  <img src="screenshots/smart_savings.jpg" width="220" alt="Smart Savings" />
+  <img src="screenshots/ai_invest_plan.jpg" width="220" alt="AI Invest Plan" />
+  <img src="screenshots/portfolio.jpg" width="220" alt="Portfolio" />
+</div>
 
 ---
 
-## 💡 Solution & Business Logic
+## 🌟 Key Features & Highlights
 
-### **Solution Brief**
-AI Finance Manager is an AI-first mobile application that transforms raw financial data into a personalized wealth-building strategy. By leveraging **Google Gemini AI**, the app analyzes spending patterns, debt obligations (EMIs), and income to provide hyper-personalized "Smart Tips," investment plans, and card recommendations that save users real money.
+### 🧠 **AI Smart Tips**
+Leverages Google Gemini to provide contextual, hyper-personalized advice based on your current financial health. Instead of generic advice, you get actionable insights directly relevant to your daily spending, income, and debt.
 
-### **Market Differentiation**
-- **Passive vs. Active**: Traditional apps show you *what* you spent; we show you *how* to spend better.
-- **Monetized Insights**: We don't just say "you spend too much on food." We suggest the specific credit card (e.g., Swiggy HDFC) that would have saved you ₹500 on those exact transactions.
-- **Contextual Investing**: Investment suggestions are calculated based on your *real-time* net savings (Income - Expenses - EMIs).
+### 💳 **Smart Savings & Card Recommendations**
+Analyzes your spending patterns and suggests the specific credit cards that would maximize your rewards. For example, it won't just track your food expenses; it will recommend a card that could save you money on those exact transactions.
 
-### **USP (Unique Selling Proposition)**
-> **"The Financial Brain in your Pocket"** — We provide the intelligence of a financial advisor with the convenience of a mobile tracker, using Gemini to bridge the gap between logging a transaction and building a portfolio.
+### 📈 **AI Investment Planning**
+Calculates your real-time net savings (Income - Expenses - EMIs) and provides a tailored investment strategy. It categorizes investments by risk (High, Medium, Low Risk) and suggests specific allocations across Stocks, SIPs, and ETFs based on your net savings percentage.
+
+### 📊 **Real-Time Portfolio Tracking**
+A comprehensive dashboard to track your investments, monitor growth, and see your overall current value versus total invested amount.
+
+---
+
+## 💡 How It Works
+
+AI Finance Manager is an AI-first mobile application that transforms raw financial data into a personalized wealth-building strategy. 
+- **Active Advisor**: Instead of just showing *what* you spent, we show you *how* to spend better.
+- **Contextual Intelligence**: Using Gemini AI to bridge the gap between logging a transaction and building a robust financial portfolio.
 
 ---
 
