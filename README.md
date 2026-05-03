@@ -27,34 +27,50 @@ A comprehensive dashboard to track your investments, monitor growth, and see you
 
 ---
 
-## 💡 How It Works
+## 💡 Comprehensive Technical Breakdown & Logic
 
-AI Finance Manager is an AI-first mobile application that transforms raw financial data into a personalized wealth-building strategy. 
-- **Active Advisor**: Instead of just showing *what* you spent, we show you *how* to spend better.
-- **Contextual Intelligence**: Using Gemini AI to bridge the gap between logging a transaction and building a robust financial portfolio.
+AI Finance Manager is not just a standard expense tracker; it acts as a proactive financial brain. By combining mobile-first engineering with state-of-the-art Generative AI, it transforms scattered financial data into an actionable, tailored wealth-building plan.
+
+### **1. Core Logic & Data Flow**
+At the heart of the application is a rigorous calculation engine that continuously monitors user finances in real-time:
+- **Income Logging**: Users log their monthly or variable income streams.
+- **Expense & EMI Tracking**: The app categorizes fixed bills, variable spending, and debt obligations (EMIs).
+- **Net Savings Calculation**: The application calculates `Real Net Savings = Total Income - (Expenses + Fixed Bills + EMIs)`. This single metric drives the entire intelligent engine.
+
+### **2. Deep Dive: Google Gemini AI API Integration**
+The standout feature of this app is its intelligent layer, powered by the **Google Gemini Pro API** (accessed via the `google_generative_ai` Flutter package).
+- **Contextual Data Processing**: The app securely packages the user’s sanitized financial context (e.g., spending categories, current debt, savings rate) into a structured prompt.
+- **Dynamic Response Parsing**: Gemini doesn't just return generic text. It is instructed to generate highly specific structured data that the app parses to display:
+  - **Smart Tips**: Contextual warnings (e.g., *"Your dining expenses are 20% higher than last month; consider cooking at home to save for your ETF goal"*).
+  - **Smart Savings & Cards**: By analyzing specific merchant names and categories, the AI maps spending habits to specific financial products (e.g., suggesting a specific co-branded credit card if food delivery spending is high).
+  - **Investment Strategist**: Based on the exact percentage of the user's `Net Savings`, Gemini formulates a diversified portfolio plan, categorizing assets into High Risk (direct equities), Medium Risk (Index Funds/SIPs), and Low Risk (FDs/Bonds).
+
+### **3. Backend & Cloud Infrastructure: Firebase APIs**
+The entire backend ecosystem relies on **Google Firebase** for scalability, security, and real-time syncing.
+- **Firebase Authentication API**: Provides secure, robust user identity management. It ensures that sensitive financial data is strictly tied to the authenticated user's unique UID.
+- **Cloud Firestore (NoSQL Database API)**: We use Firestore's real-time document-based structure to store transactions, portfolio holdings, and user profiles. 
+  - *Collections*: Transactions are stored in time-indexed collections, allowing for lightning-fast queries (e.g., fetching only "this month's expenses").
+  - *Security Rules*: Strict server-side rules guarantee that users can only read and write data explicitly owned by their UID.
+
+### **4. Frontend Architecture & State Management**
+Built with **Flutter** for a natively compiled cross-platform experience.
+- **State Management (Provider)**: We utilize `Provider` to ensure that when a new transaction is logged, the UI updates instantaneously across the Home Screen, Portfolio, and Analytics dashboards without requiring a full page reload.
+- **Data Visualization**: Complex financial data is made digestible using `fl_chart`. We implemented interactive line graphs for portfolio growth tracking and pie charts for expense categorization.
+- **Design System**: A premium, dark-mode optimized aesthetic using custom Google Fonts to give the application a professional, trustworthy feel.
 
 ---
 
-## ⚙️ Technical & Visual Assets
-
-### **Architecture Diagram**
+## ⚙️ Architecture Diagram
 ```mermaid
 graph TD
-    A[Flutter Frontend] --> B[Firebase Auth]
-    A --> C[Cloud Firestore]
-    A --> D[AIService]
-    D --> E[Google Gemini AI]
-    C --> D
-    E --> D
-    D --> A
+    A[Flutter App UI] --> B[Provider State Management]
+    B --> C[Firebase Authentication]
+    B --> D[Cloud Firestore Database]
+    B --> E[AI Service Layer]
+    E -- "Sanitized Financial Data" --> F[Google Gemini API]
+    F -- "Actionable Insights" --> E
+    E --> A
 ```
-
-### **Technologies Used**
-- **Core**: Flutter, Dart
-- **AI Engine**: Google Gemini AI (via `google_generative_ai`)
-- **Backend/Cloud**: Firebase Auth, Cloud Firestore
-- **State Management**: Provider
-- **Visualization**: fl_chart, Lucide Icons, Google Fonts
 
 ---
 
@@ -73,27 +89,16 @@ graph TD
    flutter pub get
    ```
 3. **Configure Firebase**:
-   - Add your `google-services.json` (Android) and `GoogleService-Info.plist` (iOS) to the respective directories.
+   - Create a project on the Firebase Console.
+   - Enable Authentication (Email/Password or Google Sign-In) and Firestore.
+   - Download and add `google-services.json` (Android) and `GoogleService-Info.plist` (iOS) to the respective directories.
 4. **Add Gemini API Key**:
    - Obtain a key from [Google AI Studio](https://aistudio.google.com/).
-   - Update the `_apiKey` in `lib/services/ai_service.dart`.
+   - Update the `_apiKey` variable in `lib/services/ai_service.dart`.
 5. **Run the app**:
    ```bash
    flutter run
    ```
-
----
-
-## 🛣 Future Roadmap
-- [ ] Automated SMS expense parsing.
-- [ ] Multi-currency support.
-- [ ] Real-time stock market tracking.
-
----
-
-### **Project Links**
-- **GitHub Repository**: [Link]
-- **Demo Video**: [Link]
 
 ---
 
